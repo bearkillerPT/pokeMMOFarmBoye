@@ -6,14 +6,13 @@ import autoit
 import math
 import cv2 as cv
 import numpy as np
-
+import copy
 METINTEXTDISTANCE = 60
 
 healthbarnotempty = False
 pickupkeypressed = False
 healthbar_located = False
 pixelcolor = (0, 0, 0)
-clients = []
 class Metin:
 
     def locateHealthBar():
@@ -40,7 +39,8 @@ class Metin:
         metinhealthbarlocations = pyautogui.locateAllOnScreen('C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\metin_hp.png', confidence=0.9, grayscale=True)
         for healthbar in metinhealthbarlocations:
             print(healthbar)
-            if healthbar[0] < client["healthbar"][0] + 700 and healthbar[0] + 800 > client["healthbar"][0] and healthbar[1] < client["healthbar"][1] and healthbar[1] > client["healthbar"][1] - 700:
+            print(client["healthbar"])
+            if healthbar[0] < client["healthbar"][0] + 850 and healthbar[0] > client["healthbar"][0] and healthbar[1] < client["healthbar"][1] and healthbar[1] > client["healthbar"][1] - 700:
                 return healthbar
 
 
@@ -119,10 +119,14 @@ class Metin:
         
     def lookaround():
         print('looking around')
-        pydirectinput.keyDown('numpad4')
-        pydirectinput.keyDown('left')
-        pydirectinput.keyUp('numpad4')
-        pydirectinput.keyUp('left')
+        pydirectinput.press('q')
+        pydirectinput.press('q')
+        pydirectinput.press('q')
+        pydirectinput.press('q')
+
+        #pydirectinput.keyDown('left')
+        #pydirectinput.keyUp('left')
+
     def useSkills():
         print('Using skills!')
         pydirectinput.keyDown('ctrl')
@@ -140,15 +144,18 @@ class Metin:
 def run_bot():
     # Locate the Healthbar for init
     healthbarlocations = 0
+    clients = []
+
     while not healthbarlocations:
         healthbarlocations = Metin.locateHealthBar()
     for location in healthbarlocations:
-        clients.append({"healthbar": location,
+        append_dict = {"healthbar": location,
                       "skills_timer" : 0,
                       "bugged_timer": 0,
                       "farming": False,
                       "windowTop": (location[0], location[1] - 740)
-                     })
+                     }
+        clients.append(copy.deepcopy(append_dict))
     while True:
         for client in clients:
             pyautogui.moveTo(client["windowTop"][0], client["windowTop"][1], 0.2)
@@ -166,7 +173,7 @@ def run_bot():
                 if Metin.findMetinOpenCV(client):
                     client["bugged_timer"] = time.time()
                     client["farming"] = True
-                
+                    break
                 else:
                     Metin.lookaround()
                     Metin.lookaround()
@@ -181,6 +188,10 @@ def run_bot():
                 pyautogui.moveTo(client["windowTop"][0], client["windowTop"][1], 0.2)
                 autoit.mouse_click("left",client["windowTop"][0], client["windowTop"][1],2)
                 Metin.collectLoot()
+                if Metin.findMetinOpenCV(client):
+                    client["bugged_timer"] = time.time()
+                    client["farming"] = True
+                    break
 
 
 
