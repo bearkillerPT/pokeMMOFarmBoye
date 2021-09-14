@@ -18,10 +18,25 @@ pixelcolor = (0, 0, 0)
 class Metin:
 
     def locateHealthBar():
-        healthbarlocation = pyautogui.locateOnScreen('C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\bar_full.png', confidence=0.9, grayscale=True)
+        res=[]
+        toInsert = True
+        healthbarlocation = pyautogui.locateAllOnScreen('C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\bar_full.png', confidence=0.9, grayscale=True)            
         if healthbarlocation:
-            print("Healthbarposition located: " + str(healthbarlocation))
-            return healthbarlocation
+            for barlocation in healthbarlocation:
+                if len(res) == 0:
+                    res.append(barlocation)
+                else:
+                    for barlocation2 in res:   
+                            if abs(barlocation.left - barlocation2.left) < 10:
+                                toInsert = False
+                    if toInsert:
+                        res.append(barlocation)
+                    else:
+                        toInsert = True
+            for barlocation in res:
+                print("Healthbarposition located: " + str(barlocation))
+            
+            return res
     def locateMetinHealthBar():
         metinhealthbarlocation = healthbarlocation = pyautogui.locateOnScreen('C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\metin_hp.png', confidence=0.9, grayscale=True)
         if healthbarlocation:
@@ -88,7 +103,7 @@ class Metin:
         target_dist = 1000
         target = 0
         for pt in zip(*loc[::-1]):
-            if(math.sqrt(abs(300 - pt[0]) + abs(400- pt[1] + h + METINTEXTDISTANCE)) < target_dist and pt[1] + h + METINTEXTDISTANCE < 700):
+            if(math.sqrt(abs(300 - pt[0]) + abs(400- pt[1] + h + METINTEXTDISTANCE)) < target_dist and pt[0] + w < 750 and pt[1] + h + METINTEXTDISTANCE < 700):
                 target = pt
         if not target:
             return False
