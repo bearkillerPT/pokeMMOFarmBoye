@@ -8,10 +8,12 @@ import cv2 as cv
 import numpy as np
 import copy
 METINTEXTDISTANCE = 60
-
+metin_health_bar_image = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\metin_hp.png'
+logged_out_image = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\logged_out_right.png'
 healthbarnotempty = False
 pickupkeypressed = False
 healthbar_located = False
+clients = []
 pixelcolor = (0, 0, 0)
 class Metin:
 
@@ -35,23 +37,38 @@ class Metin:
                 print("Healthbarposition located: " + str(barlocation))
             
             return res
-    def locateAllandFilterMetinHealthBar(client):
-        metinhealthbarlocations = pyautogui.locateAllOnScreen('C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\metin_hp.png', confidence=0.9, grayscale=True)
-        for healthbar in metinhealthbarlocations:
-            print(healthbar)
-            print(client["healthbar"])
-            if healthbar[0] < client["healthbar"][0] + 850 and healthbar[0] > client["healthbar"][0] and healthbar[1] < client["healthbar"][1] and healthbar[1] > client["healthbar"][1] - 700:
-                return healthbar
+
+    def handleLogout(client):
+        pyautogui.moveTo(client["window_top"][0] , client["window_top"][1] , 0.2)
+        autoit.mouse_click("left",client["window_top"][0], client["window_top"][1], 2)
+        print('f' + str(clients.index(client) + 2))
+        pydirectinput.press('f' + str(clients.index(client) + 2))
+        time.sleep(2)
+        pyautogui.press('enter')
 
 
+    def locateAllandFilterProp(client, prop_image, prop_type):
+        prop_locations = pyautogui.locateAllOnScreen(prop_image, confidence=0.9, grayscale=True)
+        for prop_location in prop_locations:
+            if prop_type == "metin_health_bar":
+                if prop_location[0] < client["healthbar"][0] + 850 and prop_location[0] > client["healthbar"][0] and prop_location[1] < client["healthbar"][1] and prop_location[1] > client["healthbar"][1] - 700:
+                    return prop_location
+            elif prop_type == "logged_out":
+                #if prop_location[0] < client["healthbar"][0] and prop_location[1] < client["healthbar"][1] and prop_location[1] > client["healthbar"][1] - 700:  
+                print(prop_location)
+                return prop_location
+
+
+                if not target:
+                    return False
+                
 
     def checkIfMetinStillAlive(client):
-        pyautogui.sleep(1)
         metinhealthbarlocation = 0
         template = cv.imread('C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\metin_writing.png',0)
         w, h = template.shape[::-1]
         while not metinhealthbarlocation:
-            metinhealthbarlocation = Metin.locateAllandFilterMetinHealthBar(client)
+            metinhealthbarlocation = Metin.locateAllandFilterProp(client, metin_health_bar_image, "metin_health_bar1")
             screenshot = np.array(pyautogui.screenshot()) 
             img_gray = cv.cvtColor(screenshot, cv.COLOR_BGR2GRAY)
             if metinhealthbarlocation:
@@ -86,7 +103,7 @@ class Metin:
 
 
     def findMetinOpenCV(client):
-        metinhealthbarlocation = Metin.locateAllandFilterMetinHealthBar(client)
+        metinhealthbarlocation = Metin.locateAllandFilterProp(client, metin_health_bar_image, "metin_health_bar1")
         if metinhealthbarlocation:
             print("Bugged! Trying again!")
             pyautogui.press('esc')
@@ -124,7 +141,7 @@ class Metin:
         pydirectinput.press('q')
         pydirectinput.press('q')
 
-        #pydirectinput.keyDown('left')
+        #pydirectinput.D('left')
         #pydirectinput.keyUp('left')
 
     def useSkills():
@@ -144,7 +161,6 @@ class Metin:
 def run_bot():
     # Locate the Healthbar for init
     healthbarlocations = 0
-    clients = []
 
     while not healthbarlocations:
         healthbarlocations = Metin.locateHealthBar()
@@ -153,23 +169,27 @@ def run_bot():
                       "skills_timer" : 0,
                       "bugged_timer": 0,
                       "farming": False,
-                      "windowTop": (location[0], location[1] - 740)
+                      "window_top": (location[0], location[1] - 740)
                      }
         clients.append(copy.deepcopy(append_dict))
     while True:
         for client in clients:
-            pyautogui.moveTo(client["windowTop"][0], client["windowTop"][1], 0.2)
-            autoit.mouse_click("left",client["windowTop"][0], client["windowTop"][1],2)
+            loggout_location = Metin.locateAllandFilterProp(client, logged_out_image, "logged_out")
+            if loggout_location:
+                Metin.handleLogout(client)
+                
+            pyautogui.moveTo(client["window_top"][0], client["window_top"][1], 0.2)
+            autoit.mouse_click("left",client["window_top"][0], client["window_top"][1],2)
             
             if( time.time() - client["skills_timer"] > 300):
                 client["skills_timer"] = time.time()
                 Metin.useSkills()
             #try to find a metin:
             #metinhealthbarlocation = Metin.locateMetinHealthBar()
-            #if(metinhealthbarlocation):
-            #    pyautogui.press('esc')
-            #    Metin.lookaround()
+            
             if not client["farming"]:
+                if(Metin.locateAllandFilterProp(client, metin_health_bar_image, "metin_health_bar")):
+                    pyautogui.press('esc')
                 if Metin.findMetinOpenCV(client):
                     client["bugged_timer"] = time.time()
                     client["farming"] = True
@@ -185,8 +205,8 @@ def run_bot():
                     pyautogui.press('d')
             else:
                 client["farming"] = False
-                pyautogui.moveTo(client["windowTop"][0], client["windowTop"][1], 0.2)
-                autoit.mouse_click("left",client["windowTop"][0], client["windowTop"][1],2)
+                pyautogui.moveTo(client["window_top"][0], client["window_top"][1], 0.2)
+                autoit.mouse_click("left",client["window_top"][0], client["window_top"][1],2)
                 Metin.collectLoot()
                 if Metin.findMetinOpenCV(client):
                     client["bugged_timer"] = time.time()
