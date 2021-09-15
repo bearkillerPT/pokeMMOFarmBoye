@@ -8,8 +8,16 @@ import cv2 as cv
 import numpy as np
 import copy
 METINTEXTDISTANCE = 60
+deliver_button_size = 10
+market_button_size = 10
+orc_tooth_button_size = 10
+submit_button_size = 10
 metin_health_bar_image = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\metin_hp.png'
 logged_out_image = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\logged_out_right.png'
+biologist_deliver = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\biologist\\deliver.png'
+biologist_market = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\biologist\\market.png'
+biologist_orc_tooth = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\biologist\\orc_tooth.png'
+biologist_submit = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\biologist\\submit_text.png'
 healthbarnotempty = False
 pickupkeypressed = False
 healthbar_located = False
@@ -38,29 +46,34 @@ class Metin:
             
             return res
 
-    def handleLogout(client):
+    def handleLogout(clients, client):
+        print("here")
         pyautogui.moveTo(client["window_top"][0] , client["window_top"][1] , 0.2)
         autoit.mouse_click("left",client["window_top"][0], client["window_top"][1], 2)
-        print('f' + str(clients.index(client) + 2))
         pydirectinput.press('f' + str(clients.index(client) + 2))
         time.sleep(2)
+        pyautogui.moveTo(client["window_top"][0] , client["window_top"][1] , 0.2)
+        autoit.mouse_click("left",client["window_top"][0], client["window_top"][1], 2)
         pyautogui.press('enter')
+        pyautogui.press('enter')
+        pyautogui.press('enter')
+        time.sleep(2)
+        
+        pyautogui.moveTo(client["window_top"][0] , client["window_top"][1] , 0.2)
+        autoit.mouse_click("left",client["window_top"][0], client["window_top"][1], 2)
+        Metin.useSkills(client)
+        print("here2")
+
 
 
     def locateAllandFilterProp(client, prop_image, prop_type):
+        known_types = ["metin_health_bar" ,"logged_out", "deliver", "market", "orc_tooth", "submit"]
         prop_locations = pyautogui.locateAllOnScreen(prop_image, confidence=0.9, grayscale=True)
         for prop_location in prop_locations:
-            if prop_type == "metin_health_bar":
-                if prop_location[0] < client["healthbar"][0] + 850 and prop_location[0] > client["healthbar"][0] and prop_location[1] < client["healthbar"][1] and prop_location[1] > client["healthbar"][1] - 700:
+            print(prop_location)
+            if prop_location[0] > client["healthbar"][0] and prop_location[0] < client["healthbar"][0] + 800 and prop_location[1] < client["healthbar"][1] and prop_location[1] > client["healthbar"][1] - 900:
+                if known_types.__contains__(prop_type):
                     return prop_location
-            elif prop_type == "logged_out":
-                #if prop_location[0] < client["healthbar"][0] and prop_location[1] < client["healthbar"][1] and prop_location[1] > client["healthbar"][1] - 700:  
-                print(prop_location)
-                return prop_location
-
-
-                if not target:
-                    return False
                 
 
     def checkIfMetinStillAlive(client):
@@ -68,7 +81,7 @@ class Metin:
         template = cv.imread('C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\metin_writing.png',0)
         w, h = template.shape[::-1]
         while not metinhealthbarlocation:
-            metinhealthbarlocation = Metin.locateAllandFilterProp(client, metin_health_bar_image, "metin_health_bar1")
+            metinhealthbarlocation = Metin.locateAllandFilterProp(client, metin_health_bar_image, "metin_health_bar")
             screenshot = np.array(pyautogui.screenshot()) 
             img_gray = cv.cvtColor(screenshot, cv.COLOR_BGR2GRAY)
             if metinhealthbarlocation:
@@ -97,18 +110,29 @@ class Metin:
             print('Pixelcolor: ' + str(pixelcolor))
             return False
 
-    def collectLoot():
+    def collectLoot(client):
         print('collecting loot')
+        pyautogui.moveTo(client["window_top"][0] , client["window_top"][1] , 0.2)
+        autoit.mouse_click("left",client["window_top"][0], client["window_top"][1], 2)
         pydirectinput.press('z', 3, interval=0.1) #cause of us layout
 
 
     def findMetinOpenCV(client):
-        metinhealthbarlocation = Metin.locateAllandFilterProp(client, metin_health_bar_image, "metin_health_bar1")
+        metinhealthbarlocation = Metin.locateAllandFilterProp(client, metin_health_bar_image, "metin_health_bar")
         if metinhealthbarlocation:
             print("Bugged! Trying again!")
-            pyautogui.press('esc')
+            pyautogui.keyDown('esc')
+            pyautogui.keyDown('a')
+            pyautogui.keyDown('s')
+            pyautogui.sleep(3)
+            pyautogui.keyUp('a')
+            pyautogui.keyUp('s')
+            pyautogui.press('q')
+            pyautogui.press('q')
+            pyautogui.keyUp('esc')
+            Metin.collectLoot(client)
             return False
-        screenshot = np.array(pyautogui.screenshot())[ client["healthbar"][1] - 730 : client["healthbar"][1], client["healthbar"][0] - 10 :client["healthbar"][0] + 900]
+        screenshot = np.array(pyautogui.screenshot())[ client["healthbar"][1] - 730 : client["healthbar"][1] - 10, client["healthbar"][0] - 10 :client["healthbar"][0] + 900]
         img_gray = cv.cvtColor(screenshot, cv.COLOR_BGR2GRAY)
         template = cv.imread('C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\metin_writing.png',0)
         w, h = template.shape[::-1]
@@ -144,7 +168,9 @@ class Metin:
         #pydirectinput.D('left')
         #pydirectinput.keyUp('left')
 
-    def useSkills():
+    def useSkills(client):
+        pyautogui.moveTo(client["window_top"][0] , client["window_top"][1] , 0.2)
+        autoit.mouse_click("left",client["window_top"][0], client["window_top"][1], 2)
         print('Using skills!')
         pydirectinput.keyDown('ctrl')
         pydirectinput.press('h')
@@ -157,11 +183,54 @@ class Metin:
         pydirectinput.keyDown('ctrl')
         pydirectinput.press('h')
         pydirectinput.keyUp('ctrl')
+
+    def biologist(client):
+        print("biologist!")
+        pyautogui.moveTo(client["window_top"][0] , client["window_top"][1] , 0.2)
+        autoit.mouse_click("left",client["window_top"][0], client["window_top"][1], 2)
+        biologist_deliver_location = Metin.locateAllandFilterProp(client, biologist_deliver, "deliver")
+        if(biologist_deliver_location):
+            pyautogui.moveTo(int((biologist_deliver_location[0] + biologist_deliver_location[0] + deliver_button_size)/2) , int((biologist_deliver_location[1] + biologist_deliver_location[1] + deliver_button_size)/2) , 0.2)
+            autoit.mouse_click("left",int((biologist_deliver_location[0] + biologist_deliver_location[0] + deliver_button_size)/2), int((biologist_deliver_location[1] + biologist_deliver_location[1] + deliver_button_size)/2), 2)
+            biologist_market_location = [0,0,10,10]
+            pyautogui.sleep(1)
+            biologist_submit_location = Metin.locateAllandFilterProp(client, biologist_submit, "submit")
+            if biologist_submit_location:
+                biologist_market_location[0] = biologist_submit_location[0] + biologist_submit_location[2] + 42 
+                biologist_market_location[1] = biologist_submit_location[1] + 47
+                pyautogui.sleep(1)
+                pyautogui.moveTo(int((biologist_market_location[0] + biologist_market_location[0] + market_button_size)/2) , int((biologist_market_location[1] + biologist_market_location[1] + market_button_size)/2) , 0.2)
+                autoit.mouse_click("left",int((biologist_market_location[0] + biologist_market_location[0] + market_button_size)/2), int((biologist_market_location[1] + biologist_market_location[1] + market_button_size)/2), 2)
+                pyautogui.sleep(4)
+                biologist_orc_tooth_location = Metin.locateAllandFilterProp(client, biologist_orc_tooth, "orc_tooth")
+                if biologist_orc_tooth_location:
+                    pyautogui.moveTo(int((biologist_orc_tooth_location[0] + biologist_orc_tooth_location[0] + orc_tooth_button_size)/2) , int((biologist_orc_tooth_location[1] + biologist_orc_tooth_location[1] + orc_tooth_button_size)/2) , 0.2)
+                    autoit.mouse_click("right",int((biologist_orc_tooth_location[0] + biologist_orc_tooth_location[0] + orc_tooth_button_size)/2), int((biologist_orc_tooth_location[1] + biologist_orc_tooth_location[1] + orc_tooth_button_size)/2), 2)
+                    pyautogui.press('esc')
+                    pyautogui.sleep(2)
+                    if biologist_submit_location:
+                        pyautogui.moveTo(int((biologist_submit_location[0] + biologist_submit_location[0] + submit_button_size)/2) , int((biologist_submit_location[1] + biologist_submit_location[1] + submit_button_size)/2) , 0.2)
+                        autoit.mouse_click("left",int((biologist_submit_location[0] + biologist_submit_location[0] + submit_button_size)/2), int((biologist_submit_location[1] + biologist_submit_location[1] + submit_button_size)/2), 2)
+                        pyautogui.sleep(1)
+                        pyautogui.moveTo(client["window_top"][0], client["window_top"][1], 0.2)
+                        autoit.mouse_click("left",client["window_top"][0], client["window_top"][1],2)
+                        pyautogui.press('esc')
+                else:
+                    pyautogui.sleep(1)
+                    pyautogui.moveTo(client["window_top"][0], client["window_top"][1], 0.2)
+                    autoit.mouse_click("left",client["window_top"][0], client["window_top"][1],2)
+                    pyautogui.press('esc')
+            pyautogui.sleep(1)
+            pyautogui.moveTo(int((biologist_orc_tooth_location[0] + biologist_orc_tooth_location[0] + orc_tooth_button_size)/2) , int((biologist_orc_tooth_location[1] + biologist_orc_tooth_location[1] + orc_tooth_button_size)/2) , 0.2)
+            autoit.mouse_click("right",int((biologist_orc_tooth_location[0] + biologist_orc_tooth_location[0] + orc_tooth_button_size)/2), int((biologist_orc_tooth_location[1] + biologist_orc_tooth_location[1] + orc_tooth_button_size)/2), 2)
+            pyautogui.press('esc')
+
     
 def run_bot():
     # Locate the Healthbar for init
     healthbarlocations = 0
-
+    #print(pyautogui.locateOnScreen(biologist_submit))
+    #return
     while not healthbarlocations:
         healthbarlocations = Metin.locateHealthBar()
     for location in healthbarlocations:
@@ -174,16 +243,18 @@ def run_bot():
         clients.append(copy.deepcopy(append_dict))
     while True:
         for client in clients:
+            Metin.biologist(client)
             loggout_location = Metin.locateAllandFilterProp(client, logged_out_image, "logged_out")
             if loggout_location:
-                Metin.handleLogout(client)
+                Metin.handleLogout(clients, client)
+                
                 
             pyautogui.moveTo(client["window_top"][0], client["window_top"][1], 0.2)
             autoit.mouse_click("left",client["window_top"][0], client["window_top"][1],2)
             
             if( time.time() - client["skills_timer"] > 300):
                 client["skills_timer"] = time.time()
-                Metin.useSkills()
+                Metin.useSkills(client)
             #try to find a metin:
             #metinhealthbarlocation = Metin.locateMetinHealthBar()
             
@@ -192,6 +263,14 @@ def run_bot():
                     pyautogui.press('esc')
                 if Metin.findMetinOpenCV(client):
                     client["bugged_timer"] = time.time()
+                    pyautogui.keyDown('a')
+                    pyautogui.keyDown('s')
+                    pyautogui.sleep(3)
+                    pyautogui.keyUp('a')
+                    pyautogui.keyUp('s')
+                    pyautogui.press('q')
+                    pyautogui.press('q')
+                    
                     client["farming"] = True
                     break
                 else:
@@ -200,14 +279,21 @@ def run_bot():
                     break
                 #check if the metin is still alive
             if Metin.checkIfMetinStillAlive(client):
-                if(time.time() - client["bugged_timer"] > 20):
+                if(time.time() - client["bugged_timer"] > 60):
+                    pyautogui.press('esc')
+                    pyautogui.press('esc')
                     pyautogui.press('d')
                     pyautogui.press('d')
+                    print("UnBugging!")
+                    client["farming"] = False
+                    client["bugged_timer"] = time.time()
+                    Metin.collectLoot(client)
+                    break
             else:
                 client["farming"] = False
                 pyautogui.moveTo(client["window_top"][0], client["window_top"][1], 0.2)
                 autoit.mouse_click("left",client["window_top"][0], client["window_top"][1],2)
-                Metin.collectLoot()
+                Metin.collectLoot(client)
                 if Metin.findMetinOpenCV(client):
                     client["bugged_timer"] = time.time()
                     client["farming"] = True
@@ -216,7 +302,7 @@ def run_bot():
 
 
 if __name__ == '__main__':
-    run_bot()
+        run_bot()
 
 # while True:
 #     if not Metin.findMetinOpenCV():
