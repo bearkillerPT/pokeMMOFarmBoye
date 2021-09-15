@@ -122,6 +122,7 @@ class Metin:
         if metinhealthbarlocation:
             print("Bugged! Trying again!")
             pyautogui.keyDown('esc')
+            pyautogui.keyUp('esc')
             pyautogui.keyDown('a')
             pyautogui.keyDown('s')
             pyautogui.sleep(3)
@@ -129,7 +130,6 @@ class Metin:
             pyautogui.keyUp('s')
             pyautogui.press('q')
             pyautogui.press('q')
-            pyautogui.keyUp('esc')
             Metin.collectLoot(client)
             return False
         screenshot = np.array(pyautogui.screenshot())[ client["healthbar"][1] - 730 : client["healthbar"][1] - 10, client["healthbar"][0] - 10 :client["healthbar"][0] + 900]
@@ -203,47 +203,47 @@ class Metin:
                 autoit.mouse_click("left",int((biologist_market_location[0] + biologist_market_location[0] + market_button_size)/2), int((biologist_market_location[1] + biologist_market_location[1] + market_button_size)/2), 2)
                 pyautogui.sleep(4)
                 biologist_orc_tooth_location = Metin.locateAllandFilterProp(client, biologist_orc_tooth, "orc_tooth")
+                for x in pyautogui.locateAllOnScreen(biologist_orc_tooth):
+                    print(x)
                 if biologist_orc_tooth_location:
                     pyautogui.moveTo(int((biologist_orc_tooth_location[0] + biologist_orc_tooth_location[0] + orc_tooth_button_size)/2) , int((biologist_orc_tooth_location[1] + biologist_orc_tooth_location[1] + orc_tooth_button_size)/2) , 0.2)
                     autoit.mouse_click("right",int((biologist_orc_tooth_location[0] + biologist_orc_tooth_location[0] + orc_tooth_button_size)/2), int((biologist_orc_tooth_location[1] + biologist_orc_tooth_location[1] + orc_tooth_button_size)/2), 2)
-                    pyautogui.press('esc')
+                    pydirectinput.press('escape')
                     pyautogui.sleep(2)
                     if biologist_submit_location:
                         pyautogui.moveTo(int((biologist_submit_location[0] + biologist_submit_location[0] + submit_button_size)/2) , int((biologist_submit_location[1] + biologist_submit_location[1] + submit_button_size)/2) , 0.2)
                         autoit.mouse_click("left",int((biologist_submit_location[0] + biologist_submit_location[0] + submit_button_size)/2), int((biologist_submit_location[1] + biologist_submit_location[1] + submit_button_size)/2), 2)
-                        pyautogui.sleep(1)
-                        pyautogui.moveTo(client["window_top"][0], client["window_top"][1], 0.2)
-                        autoit.mouse_click("left",client["window_top"][0], client["window_top"][1],2)
-                        pyautogui.press('esc')
                 else:
                     pyautogui.sleep(1)
                     pyautogui.moveTo(client["window_top"][0], client["window_top"][1], 0.2)
                     autoit.mouse_click("left",client["window_top"][0], client["window_top"][1],2)
-                    pyautogui.press('esc')
+                    pydirectinput.press('escape')
             pyautogui.sleep(1)
             pyautogui.moveTo(int((biologist_orc_tooth_location[0] + biologist_orc_tooth_location[0] + orc_tooth_button_size)/2) , int((biologist_orc_tooth_location[1] + biologist_orc_tooth_location[1] + orc_tooth_button_size)/2) , 0.2)
             autoit.mouse_click("right",int((biologist_orc_tooth_location[0] + biologist_orc_tooth_location[0] + orc_tooth_button_size)/2), int((biologist_orc_tooth_location[1] + biologist_orc_tooth_location[1] + orc_tooth_button_size)/2), 2)
-            pyautogui.press('esc')
+            pydirectinput.press('escape')
+            client["biologist_timer"] = time.time()
 
     
 def run_bot():
+    bilogist = False
     # Locate the Healthbar for init
     healthbarlocations = 0
-    #print(pyautogui.locateOnScreen(biologist_submit))
-    #return
     while not healthbarlocations:
         healthbarlocations = Metin.locateHealthBar()
     for location in healthbarlocations:
         append_dict = {"healthbar": location,
                       "skills_timer" : 0,
                       "bugged_timer": 0,
+                      "biologist_timer": 0,
                       "farming": False,
                       "window_top": (location[0], location[1] - 740)
                      }
         clients.append(copy.deepcopy(append_dict))
     while True:
         for client in clients:
-            Metin.biologist(client)
+            if bilogist and (time.time() - client["biologist_timer"] > 650):
+                Metin.biologist(client)
             loggout_location = Metin.locateAllandFilterProp(client, logged_out_image, "logged_out")
             if loggout_location:
                 Metin.handleLogout(clients, client)
@@ -260,17 +260,16 @@ def run_bot():
             
             if not client["farming"]:
                 if(Metin.locateAllandFilterProp(client, metin_health_bar_image, "metin_health_bar")):
-                    pyautogui.press('esc')
+                    pydirectinput.press('escape')
                 if Metin.findMetinOpenCV(client):
                     client["bugged_timer"] = time.time()
-                    pyautogui.keyDown('a')
-                    pyautogui.keyDown('s')
+                    pydirectinput.keyDown('a')
+                    pydirectinput.keyDown('s')
                     pyautogui.sleep(3)
-                    pyautogui.keyUp('a')
-                    pyautogui.keyUp('s')
-                    pyautogui.press('q')
-                    pyautogui.press('q')
-                    
+                    pydirectinput.keyUp('a')
+                    pydirectinput.keyUp('s')
+                    pydirectinput.press('q')
+                    pydirectinput.press('q')
                     client["farming"] = True
                     break
                 else:
@@ -280,8 +279,8 @@ def run_bot():
                 #check if the metin is still alive
             if Metin.checkIfMetinStillAlive(client):
                 if(time.time() - client["bugged_timer"] > 60):
-                    pyautogui.press('esc')
-                    pyautogui.press('esc')
+                    
+                    pydirectinput.press('escape')
                     pyautogui.press('d')
                     pyautogui.press('d')
                     print("UnBugging!")
