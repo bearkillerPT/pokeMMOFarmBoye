@@ -54,18 +54,17 @@ class Metin:
     def handleLogout(clients, client):
         pyautogui.moveTo(client["window_top"][0] , client["window_top"][1] , 0.2)
         autoit.mouse_click("left",client["window_top"][0], client["window_top"][1], 2)
+        pyautogui.moveTo(client["window_top"][0] , client["window_top"][1] +200, 0.2)
+        autoit.mouse_click("left",client["window_top"][0], client["window_top"][1]+200, 2)
         pydirectinput.press('f' + str(clients.index(client) + 2))
         time.sleep(2)
         pyautogui.moveTo(client["window_top"][0] , client["window_top"][1] , 0.2)
         autoit.mouse_click("left",client["window_top"][0], client["window_top"][1], 2)
         pyautogui.press('enter')
         pyautogui.press('enter')
-        pyautogui.press('enter')
-        time.sleep(2)
-        
-        pyautogui.moveTo(client["window_top"][0] , client["window_top"][1] , 0.2)
-        autoit.mouse_click("left",client["window_top"][0], client["window_top"][1], 2)
-        Metin.useSkills(client)
+        pyautogui.keyDown('f')
+        pyautogui.sleep(2)
+        pyautogui.keyUp('f')
 
 
 
@@ -144,15 +143,14 @@ class Metin:
         loc = np.where( res >= threshold)
         target_dist = 1000
         target = 0
-        red_pixels = 0
         for pt in zip(*loc[::-1]):
+            red_pixels = 0
             if pt[0] + w < len(screenshot) and pt[1] + h + 70 < len(screenshot[0]):
                 for i in range(pt[0], pt[0] + w):
                     for j in range(pt[1] +70, pt[1] + h+ 70):
                         pixel = screenshot[i, j]
                         if pixel[0] > 200 and pixel[1] < 50 and pixel[2] < 50:
                             red_pixels += 1
-                print("Red pixels: " + str(red_pixels) + "")
                 #cv.rectangle(img_gray, (pt[0], pt[1] + 70), (pt[0] + w, pt[1] + h + 70), (255,0,0), 2)
                 #cv.imwrite('res.png',img_gray)         
                 if red_pixels < 10 and (math.sqrt(abs(300 - pt[0]) + abs(400- pt[1] + h + METINTEXTDISTANCE)) < target_dist and pt[0] + w < 750 and pt[1] + h + METINTEXTDISTANCE < 700):
@@ -239,22 +237,24 @@ class Metin:
         deleted = []
         print("Cleaning Inventory!")
         pydirectinput.press('i')
-        trash = Metin.locateAllandFilterProp(client, trash_1, "trash")
-        while trash and not deleted.__contains__(trash):
-            pyautogui.moveTo(int((trash[0] + trash[0] + trash_size)/2) , int((trash[1] + trash[1] + trash_size)/2) , 0.1)
-            autoit.mouse_click("left",int((trash[0] + trash[0] + trash_size)/2), int((trash[1] + trash[1] + trash_size)/2), 1)
-            pyautogui.moveTo(client["window_top"][0] + 150, client["window_top"][1] + 150, 0.1)
-            autoit.mouse_click("left",client["window_top"][0] + 150, client["window_top"][1] + 150, 1)
-            pyautogui.sleep(0.1)
-            submit = Metin.locateAllandFilterProp(client, destroy_item, "destroy_item")
-            if submit:
-                print("Item Deleted!")
-                destroy_button = int(submit[0] + 3* submit[2]/4 + 20), int(submit[1] + submit[3]/2)
-                pyautogui.moveTo(destroy_button[0], destroy_button[1] , 0.2)
-                autoit.mouse_click("left", destroy_button[0], destroy_button[1], 1)
-                pyautogui.sleep(0.4)
-                deleted.append(trash)
-                trash = Metin.locateAllandFilterProp(client, trash_1, "trash")
+        trash_items = [trash_1, trash_2]
+        for trash_item in trash_items:
+            trash = Metin.locateAllandFilterProp(client, trash_item, "trash")
+            while trash and not deleted.__contains__(trash) and time.time() - client["clear_inventory_bugged_timer"] < 50: 
+                pyautogui.moveTo(int((trash[0] + trash[0] + trash_size)/2) , int((trash[1] + trash[1] + trash_size)/2) , 0.1)
+                autoit.mouse_click("left",int((trash[0] + trash[0] + trash_size)/2), int((trash[1] + trash[1] + trash_size)/2), 1)
+                pyautogui.moveTo(client["window_top"][0] + 150, client["window_top"][1] + 150, 0.1)
+                autoit.mouse_click("left",client["window_top"][0] + 150, client["window_top"][1] + 150, 1)
+                pyautogui.sleep(0.1)
+                submit = Metin.locateAllandFilterProp(client, destroy_item, "destroy_item")
+                if submit:
+                    print("Item Deleted!")
+                    destroy_button = int(submit[0] + 3* submit[2]/4 + 20), int(submit[1] + submit[3]/2)
+                    pyautogui.moveTo(destroy_button[0], destroy_button[1] , 0.2)
+                    autoit.mouse_click("left", destroy_button[0], destroy_button[1], 1)
+                    pyautogui.sleep(0.4)
+                    deleted.append(trash)
+                    trash = Metin.locateAllandFilterProp(client, trash_item, "trash")
         pydirectinput.press('i')
         
 
@@ -276,6 +276,7 @@ def run_bot():
                       "bugged_timer": 0,
                       "biologist_timer": 0,
                       "clear_inventory_timer" : 0,
+                      "clear_inventory_bugged_timer" : 0,
                       "not_farming_loop_counter": 0,
                       "farming": False,
                       "window_top": (location[0], location[1] - 740)
@@ -286,6 +287,7 @@ def run_bot():
         for client in clients:
             #noticed that sometimes it doesn't loot
             if client["not_farming_loop_counter"] > 5:
+                Metin.collectLoot(client)
                 pydirectinput.keyDown('a')
                 pydirectinput.keyDown('s')
                 pyautogui.sleep(3)
@@ -305,6 +307,7 @@ def run_bot():
                 print("Closing Settings!")
                 pydirectinput.press('escape')
             if(time.time() - client["clear_inventory_timer"] > 500):
+                client["clear_inventory_bugged_timer"] = time.time()
                 Metin.clearInventory(client)
                 client["clear_inventory_timer"] = time.time()
             if( time.time() - client["skills_timer"] > 300):
@@ -340,11 +343,13 @@ def run_bot():
                     pydirectinput.press('escape')
                     pydirectinput.keyDown('a')
                     pydirectinput.keyDown('s')
+                    pydirectinput.keyDown('q')
                     pyautogui.sleep(1)
                     pydirectinput.keyUp('a')
                     pydirectinput.keyUp('s')
+                    pydirectinput.keyUp('q')
                     print("UnBugging client " + str(client["client_id"]) + "!")
-                    client["farming"] = False
+                    client["farming"] = True
                     client["bugged_timer"] = time.time()                    
                     break
             else:
@@ -355,6 +360,8 @@ def run_bot():
                 if Metin.findMetinOpenCV(client):
                     client["bugged_timer"] = time.time()
                     client["farming"] = True
+                    client["not_farming_loop_counter"] = 0
+
                     
 
 
