@@ -21,6 +21,7 @@ biologist_orc_tooth = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\biolo
 biologist_submit = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\biologist\\submit_text.png'
 trash_1 = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\items_to_delete\\pulseira_ebano.png'
 trash_2 = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\items_to_delete\\leque_fenix.png'
+trash_3 = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\items_to_delete\\dagger.png'
 destroy_item = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\items_to_delete\\confirm_destroy.png'
 settings = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\settings.png'
 lvl = 'C:\\Users\\gil-t\\Downloads\\MetinBot-main\\images\\lvl.png'
@@ -125,7 +126,6 @@ class Metin:
     def findMetinOpenCV(client):
         metinhealthbarlocation = Metin.locateAndFilterProp(client, metin_health_bar_image)
         if metinhealthbarlocation:
-            time.sleep(1)
             Metin.collectLoot(client)
             print("Bugged! Trying again!")
             pyautogui.keyDown('esc')
@@ -150,21 +150,23 @@ class Metin:
         yellow_pixels = 0
         for pt in zip(*loc[::-1]):
             red_pixels = 0
+
             for i in range(pt[0], pt[0] + w):
                 for j in range(pt[1] + 55, pt[1] + h+ 70):
                     if i < len(screenshot) and j < len(screenshot[0]):
                         pixel = screenshot[i, j]
                         if pixel[0] > 200 and pixel[1] < 50 and pixel[2] < 50:
                             red_pixels += 1  
-            if red_pixels < 10 and (math.sqrt(pow(abs(300 - pt[0] + int(w/2)),2) +pow(abs(400- pt[1] + h + METINTEXTDISTANCE), 2)) < target_dist and pt[0] + w < 750 and pt[1] + h + METINTEXTDISTANCE < 700):
+            if red_pixels < 10 and (math.sqrt(pow(abs(440 - pt[0] + int(w/2)),2) +pow(abs(310- pt[1] + int(h/2) + METINTEXTDISTANCE), 2)) < target_dist and pt[0] + w < 750 and pt[1] + h + METINTEXTDISTANCE < 700):
                 target = pt
         if not target:
             return False
-        #for pt in zip(*loc[::-1]):
         print(f'Metin found at {target[0] + int(w/2)} and {target[1] + h + METINTEXTDISTANCE}')
-        pyautogui.moveTo(target[0] + int(w/2) + client["healthbar"][0] - 10, target[1] + h + METINTEXTDISTANCE + client["healthbar"][1] - 730, 0.2)
+
+        #for pt in zip(*loc[::-1]):
+        pyautogui.moveTo(target[0] + int(w/2) + client["healthbar"][0]+ 10, target[1] + h + METINTEXTDISTANCE + client["healthbar"][1] - 730, 0.2)
             #pyautogui.click(clicks=2, interval=0.1)
-        autoit.mouse_click("left",target[0] + int(w/2) + client["healthbar"][0] - 10, target[1] + h + METINTEXTDISTANCE + client["healthbar"][1] - 730,2)
+        autoit.mouse_click("left",target[0] + int(w/2) + client["healthbar"][0] + 10, target[1] + h + METINTEXTDISTANCE + client["healthbar"][1] - 730,2)
             #cv.rectangle(img_gray, pt, (pt[0] + w, pt[1] + h), (0,0,255), 2)
             #cv.imwrite('res.png',img_gray)
         return True
@@ -186,6 +188,7 @@ class Metin:
         autoit.mouse_click("left",client["window_top"][0], client["window_top"][1], 2)
         print('Using skills!')
         pydirectinput.keyDown('ctrl')
+        pyautogui.sleep(0.2)
         pydirectinput.press('h')
         pydirectinput.keyUp('ctrl')
         time.sleep(1)
@@ -194,6 +197,7 @@ class Metin:
         pydirectinput.press('4')
         time.sleep(2)
         pydirectinput.keyDown('ctrl')
+        pyautogui.sleep(0.2)
         pydirectinput.press('h')
         pydirectinput.keyUp('ctrl')
 
@@ -241,7 +245,7 @@ class Metin:
         deleted = []
         print("Cleaning Inventory!")
         pydirectinput.press('i')
-        trash_items = [trash_1, trash_2]
+        trash_items = [trash_1, trash_2, trash_3]
         for trash_item in trash_items:
             trash = Metin.locateAndFilterProp(client, trash_item)
             while trash and not deleted.__contains__(trash) and time.time() - client["clear_inventory_bugged_timer"] < 50: 
@@ -261,6 +265,12 @@ class Metin:
                     trash = Metin.locateAndFilterProp(client, trash_item)
         pydirectinput.press('i')
         
+    def farm():
+        while True:
+            pydirectinput.keyDown("space")
+            pyautogui.sleep(4)
+            pydirectinput.keyUp("space")
+            autoit.mouse_click('right')
 
             
             
@@ -329,12 +339,16 @@ def run_bot():
                 client["not_farming_loop_counter"] += 1
                 if(Metin.locateAndFilterProp(client, metin_health_bar_image)):
                     Metin.collectLoot(client)
-                    pydirectinput.press('escape')
+                    pydirectinput.keyDown('space')
+                    pyautogui.sleep(1)
+                    pydirectinput.keyUp('space')
                     pydirectinput.keyDown('a')
                     pydirectinput.keyDown('s')
                     pyautogui.sleep(1)
                     pydirectinput.keyUp('a')
                     pydirectinput.keyUp('s')
+                    pydirectinput.press('escape')
+                    client["bugged_timer"] = time.time()
                     break
                 if Metin.findMetinOpenCV(client):
                     client["bugged_timer"] = time.time()
@@ -359,6 +373,8 @@ def run_bot():
                     pydirectinput.keyDown('space')
                     time.sleep(1)
                     pydirectinput.keyUp('space')
+                    client["bugged_timer"] = time.time()
+                    client["farming"] = True
                     print("UnBugging client " + str(client["client_id"]) + "!")
                     break
             else:
