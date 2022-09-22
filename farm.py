@@ -1,4 +1,5 @@
 from tokenize import String
+from turtle import right
 from cv2 import log
 import pyautogui
 from math import floor
@@ -6,9 +7,7 @@ import numpy as np
 import cv2 as cv
 from pokeGame import pokeGame
 import pydirectinput
-
-
-
+from random import random
 map_top = 'images\\map_top.png'
 image_login_1 = 'images\\login_1.png'
 image_login_2 = 'images\\login_2.png'
@@ -17,6 +16,8 @@ abra = 'images\\abra.png'
 abra_text = 'images\\abra_text.png'
 fight_ui_image = 'images\\fight_ui.png'
 pokeball_text = 'images\\pokeball_text.png'
+new_pokemon_text = 'images\\new_pokemon_text.png'
+sleep_powder = 'images\\sleep_powder.png'
 
 
 
@@ -32,23 +33,48 @@ class pokeFarmBoye:
         self.focusWindow()
         pyautogui.sleep(.5)
         while (fight_ui := self.game.detectFirstOccImage(fight_ui_image)) == None:
-            self.game.holdKey({'down'}, 0.5)
-            pyautogui.sleep(.2)
-            self.game.holdKey({'right'}, 0.2)
-            self.game.holdKey({'up'}, 0.5)
+            if (new_pokemon_box := self.game.detectFirstOccImage(new_pokemon_text)) != None:
+                self.game.moveMouseAndClick(floor(new_pokemon_box.left + new_pokemon_box.width) - 15, floor(new_pokemon_box.top + 1/2*new_pokemon_box.height))
+
+            moves = [('down', 'up'), ( 'right','left')]
+            selected_moves = moves[round(random())]
+            self.game.holdKey([selected_moves[0]], random())
             pyautogui.sleep(.5)
-            self.game.holdKey({'left'}, 0.5)
+            self.game.holdKey([selected_moves[1]], random()/2)
+            pyautogui.sleep(.2)
             continue
-        abra_detected = self.game.detectFirstOccImage(abra_text, confidence=0.8)
+        abra_detected = self.game.detectFirstOccImage(abra_text, confidence=0.6)
         print(abra_detected)
         if abra_detected != None:
-            self.game.moveMouseAndClick(floor(fight_ui.left + 3/4*fight_ui.width), floor(fight_ui.top + 1/4*fight_ui.height))
+            self.game.moveMouseAndClick(floor(fight_ui.left + 20), floor(fight_ui.top + 1/4*fight_ui.height))
+            sleep_powder_box = None
+            while (sleep_powder_box := self.game.detectFirstOccImage(sleep_powder)) == None:
+                continue
+            self.game.moveMouseAndClick(floor(sleep_powder_box.left + 1/2*sleep_powder_box.width), floor(sleep_powder_box.top + 1/2*sleep_powder_box.height))
+
+            while True:
+                if (fight_ui := self.game.detectFirstOccImage(fight_ui_image)) == None:
+                    if self.game.detectFirstOccImage(new_pokemon_text) != None:
+                        return
+                    continue
+                self.game.moveMouseAndClick(floor(fight_ui.left + 3/4*fight_ui.width), floor(fight_ui.top + 1/4*fight_ui.height))
+                menu_scroll_i = 0
+                while self.game.detectFirstOccImage(pokeball_text, confidence=0.9) == None:
+                    menu_scroll_i += 1
+                    if(menu_scroll_i < 6):
+                        pydirectinput.press('right')
+                    else:
+                        pydirectinput.press('left')
+                    pyautogui.sleep(.2)
+                pydirectinput.press('z')
+                pyautogui.sleep(8)
+            
+                if self.game.detectFirstOccImage(abra_text, confidence=0.6) == None or self.game.detectFirstOccImage(new_pokemon_text) != None:
+                    return
+            
         else:
             self.game.moveMouseAndClick(floor(fight_ui.left + 3/4*fight_ui.width), floor(fight_ui.top + 3/4*fight_ui.height))
-            while self.game.detectFirstOccImage(pokeball_text, confidence=0.9) == None:
-                pydirectinput.press('right')
-                pyautogui.sleep(1.5)
-            pydirectinput.press('z')
+            
             
     
 
