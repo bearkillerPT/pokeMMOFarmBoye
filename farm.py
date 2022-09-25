@@ -37,11 +37,15 @@ class pokeFarmBoye:
                 self.game.moveMouseAndClick(floor(new_pokemon_box.left + new_pokemon_box.width) - 15, floor(new_pokemon_box.top + 1/2*new_pokemon_box.height))
 
             moves = [('down', 'up'), ( 'right','left')]
-            selected_moves = moves[round(random())]
-            self.game.holdKey([selected_moves[0]], random())
-            pyautogui.sleep(.5)
-            self.game.holdKey([selected_moves[1]], random()/2)
-            pyautogui.sleep(.2)
+            move_seq = round(random())
+            selected_moves = moves[move_seq]
+            move_time = random()
+            if move_seq==0:
+                move_time *= 3
+            self.game.holdKey([selected_moves[1]], 2*move_time/3)
+            pyautogui.sleep(.3)
+            self.game.holdKey([selected_moves[0]], move_time)
+            pyautogui.sleep(.3)
             continue
         abra_detected = self.game.detectFirstOccImage(abra_text, confidence=0.6)
         print(abra_detected)
@@ -59,6 +63,7 @@ class pokeFarmBoye:
                     continue
                 self.game.moveMouseAndClick(floor(fight_ui.left + 3/4*fight_ui.width), floor(fight_ui.top + 1/4*fight_ui.height))
                 menu_scroll_i = 0
+                pyautogui.sleep(.5)
                 while self.game.detectFirstOccImage(pokeball_text, confidence=0.9) == None:
                     menu_scroll_i += 1
                     if(menu_scroll_i < 6):
