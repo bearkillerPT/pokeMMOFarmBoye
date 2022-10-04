@@ -8,14 +8,15 @@ class pokeGame:
     def __init__(self) -> None:
         pass
 
+
     def log_screenshot(self, ):
         screenshot = np.array(pyautogui.screenshot())
         cv.imwrite('print.png', screenshot)
 
 
-    def detectFirstOccImage(self, image, confidence=0.6):
+    def detectFirstOccImage(self, image, confidence=0.6, grayscale=True):
         image_loc = pyautogui.locateAllOnScreen(
-            image, confidence=confidence, grayscale=True)
+            image, confidence=confidence, grayscale=grayscale)
         if image_loc:
             for image_occ in image_loc:
                 return image_occ
@@ -27,6 +28,7 @@ class pokeGame:
         pyautogui.sleep(duration)
         for key in keys:
             pydirectinput.keyUp(key)
+
 
     def detectImage(self, image):
         image_loc = pyautogui.locateAllOnScreen(
