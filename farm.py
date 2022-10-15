@@ -10,6 +10,7 @@ import cv2 as cv
 from pokeGame import pokeGame
 import pydirectinput
 from random import random
+import requests
 
 map_top = 'images\\map_top.png'
 image_login_1 = 'images\\login_1.png'
@@ -22,7 +23,8 @@ fight_image = 'images\\fight.png'
 pokeball_text = 'images\\pokeball_text.png'
 new_pokemon_text = 'images\\new_pokemon_text.png'
 sleep_powder = 'images\\sleep_powder.png'
-ready_to_farm = 'images\\ready_to_farm.png'
+ready_to_farm = 'images\\ready_to_farm_pl.png'
+ready_to_farm_cinnabar = 'images\\ready_to_farm_cinnabar.png'   
 shiny_tentacool_head = 'images\\shiny_tentacool_head.png'
 shiny_text = 'images\\shiny_text.png'
 logout_text = 'images\\logout.png'
@@ -32,6 +34,7 @@ yes_text = 'images\\yes.png'
 class pokeFarmBoye:
     def __init__(self, game: pokeGame) -> None:
         self.game = game
+        self.total_encounters = int(open('encounters.count', 'r').read())
 
     def focusWindow(self):
         self.game.moveMouseAndClick(100, 10)
@@ -110,8 +113,15 @@ class pokeFarmBoye:
             pyautogui.sleep(.5)
             pydirectinput.press('5')
         pyautogui.sleep(.5)
-        if self.game.detectFirstOccImage(shiny_text, confidence=0.8):
+        if self.game.check_for_shiny() or self.game.detectFirstOccImage(shiny_text, confidence=0.8):
             print("HOLY SHIT FUCK")
+            requests.post('https://api.mynotifier.app', {
+                "apiKey": '011266e7-bd88-4109-b4f0-2cf1ef195b2c',
+                "message": "Found a shiny hehe!",
+                "description": "Bitch ruuuuuuuuuuuun you gotta catch the pokemans I can't do everything for you...",
+                "type": "info", # info, error, warning or success
+            })
+            self.handleLogout()
             while True:
                 pyautogui.sleep(10000)
 
@@ -120,17 +130,19 @@ class pokeFarmBoye:
         #pydirectinput.press("z")
 
 
-        pydirectinput.press("z")
-        pyautogui.sleep(.2)
+        #pydirectinput.press("z")
+        #pyautogui.sleep(.2)
         pydirectinput.press("down")
         pyautogui.sleep(.1)
-        #pydirectinput.press("right")
-        #pyautogui.sleep(.1)
+        pydirectinput.press("right")
+        pyautogui.sleep(.1)
         pydirectinput.press("z")
         pyautogui.sleep(.2)
         pydirectinput.press("z")
         while self.game.detectFirstOccImage(ready_to_farm) == None:
             pyautogui.sleep(1)
+        self.total_encounters += 1
+        open('encounters.count', 'w').write(str(self.total_encounters))
         print("I'm ready to farm again!")
         pyautogui.sleep(.5)
 
@@ -139,25 +151,15 @@ class pokeFarmBoye:
         
         #go to pokemon summary and favorite the teleport to key 6 or some other 
         pydirectinput.press("6")
-        pyautogui.sleep(3)
+        pyautogui.sleep(5)
         #Or fly and go inside
         #pydirectinput.press("1")
         #pyautogui.sleep(.5)
         #pydirectinput.press("z")
         #pyautogui.sleep(3)
-        pydirectinput.press('z')
-        pyautogui.sleep(1)
-        pydirectinput.press('z')
-        pyautogui.sleep(1)
-        pydirectinput.press('z')
-        pyautogui.sleep(2)
-        pydirectinput.press('z')
-        pyautogui.sleep(.5)
-        pydirectinput.press('z')
-        pyautogui.sleep(.5)
-        pydirectinput.press('z')
-        pyautogui.sleep(.5)
-        pydirectinput.press('z')
+        pydirectinput.keyDown('z')
+        pyautogui.sleep(3.5)
+        pydirectinput.keyUp('z')
 
     def farmEXPCinnabar(self):
         #Start in front of the nurse in the PC
@@ -175,9 +177,45 @@ class pokeFarmBoye:
         pydirectinput.press('z')
         pyautogui.sleep(1)
         #go to pokemon summary and favorite the sweet scent to key 5 or some other (28pp 5 per use)
-        for i in range(5): 
+        for i in range(6): 
             self.farmEXP()
         self.healPokemon() 
+
+
+    def farmShiniesPokemonLeague(self):
+        #Start in front of the nurse in the PC
+        #Walk out of the PC and into the water (i use an Ampharos to discharge them all and exp share)
+        self.game.holdKey(['x','down'], 2.5)
+        pyautogui.sleep(.25)
+        self.game.holdKey(['x','right'], .6)
+        pyautogui.sleep(.25)
+        self.game.holdKey(['x','down'], 1.5)
+        pyautogui.sleep(.25)
+        self.game.holdKey(['right'], .1)
+        pyautogui.sleep(.25)
+        self.game.holdKey(['x','down'], 1.5)
+        pyautogui.sleep(.25)
+        self.game.holdKey(['x','right'], .8)
+        pyautogui.sleep(.25)
+        self.game.holdKey(['x','down'], 1.7)
+        pyautogui.sleep(.25)
+        self.game.holdKey(['x','left'], .3)
+        pyautogui.sleep(.25)
+        self.game.holdKey(['x','up'], .3)
+        #go to pokemon summary and favorite the sweet scent to key 5 or some other (28pp 5 per use)
+        for i in range(6): 
+            self.farmEXP()
+        self.game.holdKey(['x','down'], 1)
+        pyautogui.sleep(1)
+        self.healPokemon() 
+        pyautogui.sleep(1)
+        self.game.holdKey(['x','down'], .5)
+        pyautogui.sleep(.1)
+        self.game.holdKey(['left'], .3)
+        pyautogui.sleep(.1)
+        self.game.holdKey(['down'], .4)
+        pyautogui.sleep(1)
+
 
 
     def farmEXPIsland2(self):
@@ -187,21 +225,24 @@ class pokeFarmBoye:
         self.game.holdKey(['x','right'], 1.25)
         self.game.holdKey(['x','up'], .5)
         self.game.holdKey(['x','right'], 1.4)
-        self.game.holdKey(['x','up'], 2.2)
+        self.game.holdKey(['x','up'], 2)
 
+        pyautogui.sleep(1)
+        pydirectinput.press('z')
         pyautogui.sleep(.5)
         pydirectinput.press('z')
-        pyautogui.sleep(.75)
+        pyautogui.sleep(.5)
         pydirectinput.press('z')
-        pyautogui.sleep(.75)
+        pyautogui.sleep(.5)
         pydirectinput.press('z')
         pyautogui.sleep(.5)
         pydirectinput.press('z')
         pyautogui.sleep(1)
         #go to pokemon summary and favorite the sweet scent to key 5 or some other (28pp 5 per use)
-        for i in range(5): 
+        for i in range(6): 
             self.farmEXP()
         self.healPokemon() 
+        pyautogui.sleep(1)
         self.game.holdKey(['x','down'], 1)
         pyautogui.sleep(1)
 
@@ -238,7 +279,7 @@ class pokeFarmBoye:
         self.game.holdKey(['left'], 3.75)
         self.game.holdKey(['down'], 1.5)
         self.game.holdKey(['right'], 1.75)
-        self.game.holdKey(['up'], 2.5)
+        self.game.holdKey(['up'], 2.2)
         pydirectinput.press('z')
 
 
@@ -255,16 +296,20 @@ def run_bot():
     farm_duration = 60 * 90 #1 + 1/2 hours
     if(len(sys.argv) == 2):
         farm_duration = 60 * int(sys.argv[1]) #First argument is time in min    
+
     while True:
+        #if shit := poke_game.detectFirstOccImage(shiny_text, confidence=0.6):
+        #    poke_game.moveMouseAndClick(floor(shit.left + shit.width/2), floor(shit.top + shit.height/2))
+        #    print("HOLY SHIT FUCK")
         if(time() > init_game_time + farm_duration):
             print("I'm done! In:" + str((time() - init_game_time)/60) + " minutes and was supposed to have lasted for " + str(farm_duration/60) + " but I had to kill'em all...")
             farm_boye.handleLogout()
-            pyautogui.sleep(farm_duration)
+            pyautogui.sleep(4*farm_duration)
 
-        if login_box := poke_game.detectFirstOccImage(image_login_1, 0.6):
+        if login_box := poke_game.detectFirstOccImage(image_login_1, 0.7):
             farm_boye.handleLogin(login_box)
 
-        farm_boye.farmEXPIsland2()
+        farm_boye.farmShiniesPokemonLeague()
         #Pokemon slots farm
         #farm_boye.focusWindow()
         #poke_game.holdKey(['down'], 1)
