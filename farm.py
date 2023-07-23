@@ -35,6 +35,7 @@ yes_text = 'images\\yes.png'
 evolving = 'images\\evolving.png'
 reference_position = 'images\\reference_position.png'
 referemce_hp = 'images\\referemce_hp.png'
+noPP = 'images\\noPP.png'
 
 
 class pokeFarmBoye:
@@ -314,20 +315,36 @@ class pokeFarmBoye:
         self.game.holdKey(['x','up'], .4)
         self.game.holdKey(['x','right'], .4)
         for i in range(20):
-            min_x = 435
-            max_x = 940
+            min_x = 550
+            max_x = 1000
+            no_reference_position_count = 0
             while not self.game.detectFirstOccImage(fight_ui_image):
-                if (x:=self.game.detectFirstOccImage(reference_position)):
-                    walk_interval = random()*2
-                    if walk_interval < .7:
-                        walk_interval = .7
+                if (x:=self.game.detectFirstOccImage(reference_position, confidence=0.8)):
+                    if x.left > 1700:
+                        self.healPokemon() 
+                        pyautogui.sleep(1)
+                        self.game.holdKey(['down'], 1.3)
+                        pyautogui.sleep(1)
+                        return
+                    if x.top < 180:
+                        self.game.holdKey(['up'], .05)
+                    walk_interval = random() * 1.5
+                    if walk_interval > 1:
+                        walk_interval = 1
 
-                    if x.left < (max_x + min_x )/ 2:
-                        self.game.holdKey(['left'], walk_interval)
+                    if x.left < max_x:
+                        self.game.holdKey(['x','left'], walk_interval)
                     else:
-                        self.game.holdKey(['right'], walk_interval)
-                pyautogui.sleep(.5)
-
+                        self.game.holdKey(['x','right'], walk_interval)
+                else: 
+                    no_reference_position_count += 1
+                    pyautogui.sleep(1)
+                    if no_reference_position_count > 10:
+                        self.healPokemon() 
+                        pyautogui.sleep(1)
+                        self.game.holdKey(['down'], 1.3)
+                        pyautogui.sleep(1)
+                        return 
             if self.game.check_for_shiny( shinybox=(250, 50, 450, 210)) or self.game.detectFirstOccImage(shiny_text, confidence=0.8):
                 print("HOLY SHIT FUCK")
                 requests.post('https://api.mynotifier.app', {
@@ -339,7 +356,6 @@ class pokeFarmBoye:
                 self.handleLogout()
                 while True:
                     pyautogui.sleep(10000)
-            print(self.game.detectImage(referemce_hp, confidence=.95))
             hp_box=self.game.detectFirstOccImage(referemce_hp, confidence=.95)
             if hp_box:
                 hp_text = sc.grab(bbox=(hp_box.left-hp_box.width, hp_box.top, hp_box.left, hp_box.top+hp_box.height))
@@ -351,11 +367,21 @@ class pokeFarmBoye:
                         hp = int(text)
                     except:
                         pass
-                    if hp and hp > 40:
-                        print("Still Healthy!")
-                    else:
-                        break
-            pyautogui.sleep(.5)
+                    print("Current hp: " + str(hp))
+                    if hp and hp < 60:
+                        pyautogui.sleep(2)
+                        pydirectinput.press("down")
+                        pyautogui.sleep(.3)
+                        pydirectinput.press("right")
+                        pyautogui.sleep(.3)
+                        pyautogui.press('z')
+                        pyautogui.sleep(5)
+
+                        self.healPokemon() 
+                        pyautogui.sleep(1)
+                        self.game.holdKey(['down'], 1.3)
+                        pyautogui.sleep(.5)
+                        return
             if self.game.is_horde():
                 pydirectinput.press("right")
                 pyautogui.sleep(.5)
@@ -370,16 +396,34 @@ class pokeFarmBoye:
                 pyautogui.press('z')
             pyautogui.sleep(6)
             while self.game.detectFirstOccImage(reference_position) == None:
+                
                 if self.game.detectFirstOccImage(fight_ui_image):
                     pyautogui.press('z')
-                    pyautogui.sleep(.5)
-                    pydirectinput.press("up")
-                    pyautogui.sleep(.5)
-                    pydirectinput.press("left")
+                    pyautogui.sleep(.3)
+                    pydirectinput.press("down")
+                    pyautogui.sleep(.3)
+                    pydirectinput.press("right")
                     pyautogui.sleep(.1)
                     pyautogui.press('z')
+                    for i in range(4):
+                        if self.game.detectFirstOccImage(noPP):
+                            pyautogui.sleep(2)
+                            pydirectinput.press("down")
+                            pyautogui.sleep(.3)
+                            pydirectinput.press("right")
+                            pyautogui.sleep(.3)
+                            pyautogui.press('z')
+                            pyautogui.sleep(5)
+
+                            self.healPokemon() 
+                            pyautogui.sleep(1)
+                            self.game.holdKey(['down'], 1.3)
+                            pyautogui.sleep(.5)
+                            return
+                        pyautogui.sleep(.5)
             
         self.healPokemon() 
+        pyautogui.sleep(1)
         self.game.holdKey(['down'], 1.3)
         pyautogui.sleep(1)
 
@@ -392,7 +436,7 @@ def run_bot():
     init_game_time = time()
     farm_boye.focusWindow()
     pyautogui.sleep(.5)
-    farm_duration = 60 * 90 #1 + 1/2 hours
+    farm_duration = 60 * 60 #1 hour
     if(len(sys.argv) == 2):
         farm_duration = 60 * int(sys.argv[1]) #First argument is time in min    
 

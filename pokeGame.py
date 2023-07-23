@@ -23,12 +23,13 @@ class pokeGame:
     def is_horde(self):
         txt = self.readScreen()
         txt_split = txt.split(' ')
+        print("isHorde OCR text recognized: " + txt.replace('\n', ' '))
         if len(txt_split) > 15:
             return True
         return False
 
         
-    def readScreen(self, shinybox=(50, 50, 1400, 210)):
+    def readScreen(self, shinybox=(50, 50, 1800, 210)):
         global stop
         while stop:
             pyautogui.sleep(.4)
@@ -52,11 +53,11 @@ class pokeGame:
         hsv_channels = cv.split(hsv)
 
         txt = pytesseract.image_to_string( hsv_channels[0])
-        print(txt)
+        print("OCR pokemon data (name, lvl, hp): \n\t" + txt.replace('\n', ' '))
         if 'Shiny' in txt or 'shiny' in txt or 'SHINY' in txt:
-            print('SHINY DETECTED')
+            print('Shiny Detected!')
             return True
-        print('NO SHINY DETECTED')
+        print('No Shiny Detected!')
         return False
 
     def log_screenshot(self, ):
