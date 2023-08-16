@@ -326,7 +326,7 @@ class pokeFarmBoye:
                         self.game.holdKey(['down'], 1.3)
                         pyautogui.sleep(1)
                         return
-                    if x.top < 180:
+                    if x.top < 85:
                         self.game.holdKey(['up'], .05)
                     walk_interval = random() * 1.5
                     if walk_interval > 1:
