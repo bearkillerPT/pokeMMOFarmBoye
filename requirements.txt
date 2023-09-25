@@ -1,0 +1,8 @@
+numpy==1.21.2
+opencv-python==4.5.3.56
+pyautogui==0.9.52
+pydirectinput==1.0.7
+pyscreenshot==1.0.4
+pytesseract==0.3.8
+regex==2021.9.30
+requests==2.26.0
