@@ -30,6 +30,8 @@ Since pokemmo writes Shiny in the name of the pokemon if it is one!
 # Push notifications
 I've implemented a push notification system using the gotify api!
 You should download the gotify server on [github](https://github.com/gotify/server/releases) and run the exe. This will create a server on port 80 and you can access a web ui through your browser on localhost. Setup an application and copy the token to the code. Download the gotify app on your phone and use your local network ip to connect to the server. You should now be able to receive notifications on your phone!  
+**Remember to always turn on the server before running the bot!**
+
 
 I love doing openCV bots for my favorite games since if you don't abuse the amount of time the bot is running there's no real danger of being bannned!
 Hopefully this will be of use for you!
