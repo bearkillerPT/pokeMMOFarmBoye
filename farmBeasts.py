@@ -160,9 +160,29 @@ def goToPCAndHeal():
     time.sleep(2)
     print('Healed! Exiting...')
 
+def runJohtoFromPCToRoute42():
+    # 100% encounter rate with hordes of mareep
+    pydirectinput.keyDown('left')
+    time.sleep(.9)
+    pydirectinput.keyUp('left')
+    pydirectinput.keyDown('up')
+    time.sleep(1.2)
+    pydirectinput.keyUp('up')
+    pydirectinput.keyDown('left')
+    time.sleep(2)
+    pydirectinput.keyUp('left')
+    pydirectinput.keyDown('up')
+    time.sleep(.2)
+    pydirectinput.keyUp('up')
+    pydirectinput.keyDown('left')
+    time.sleep(2)
+    pydirectinput.keyUp('left')
+    pydirectinput.keyDown('down')
+    time.sleep(.5)
+    pydirectinput.keyUp('down')
 
 def runJohtoFromPCToBellowSafari():
-    # cool place with hordes of tauras and
+    # cool place with hordes of tauros, gloom and fearow
     pydirectinput.keyDown('down')
     time.sleep(.2)
     pydirectinput.keyUp('down')
@@ -181,7 +201,8 @@ def farmHordes():
     global encountersCount
 
     print('Going to the horde location...')
-    runJohtoFromPCToBellowSafari()
+    #runJohtoFromPCToBellowSafari()
+    runJohtoFromPCToRoute42()
     print('Arrived! Starting to farm...')
     for i in range(sweetScentPP): 
         time.sleep(1)
@@ -203,12 +224,12 @@ def farmHordes():
                 if isShiny(text) or isBeast(text):
                     # Replace with your Gotify server URL and application token
                     gotify_url = 'http://localhost:80'
-                    app_token = 'ANhXu4_i1sel-NF'
+                    app_token = 'APJQrj78re2CzhV'
 
                     # Create a notification message
                     message = {
                         'title': 'It\'s a miracle!',
-                        'message': 'Found a shiny or beast! Exiting...',
+                        'message': 'Found a shiny or beast! You better run to chatch this one! Exiting...',
                         'priority': 7,
                     }
 
@@ -246,6 +267,8 @@ encountersCount = 0
 if os.path.isfile('encountersCount.txt'):
     with open('encountersCount.txt', 'r') as f:
         encountersCount = int(f.readline())
+
+
 
 while True:
     farmHordes()
