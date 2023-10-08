@@ -162,6 +162,7 @@ def goToPCAndHeal():
 
 def runJohtoFromPCToRoute42():
     # 100% encounter rate with hordes of mareep
+    pydirectinput.keyDown('x')
     pydirectinput.keyDown('left')
     time.sleep(.9)
     pydirectinput.keyUp('left')
@@ -190,10 +191,37 @@ def runJohtoFromPCToBellowSafari():
     time.sleep(1.2)
     pydirectinput.keyUp('right')
     pydirectinput.keyDown('down')
-    pydirectinput.keyDown('x')
     time.sleep(4.75)
-    pydirectinput.keyUp('x')
     pydirectinput.keyUp('down')
+    pydirectinput.keyUp('x')
+
+def runHoennFromPCToDittoCave():
+    pydirectinput.keyDown('x')
+    pydirectinput.keyDown('left')
+    time.sleep(1.1)
+    pydirectinput.keyUp('left')
+    pydirectinput.keyDown('down')
+    time.sleep(.01)
+    pydirectinput.keyUp('down')
+    pydirectinput.keyDown('left')
+    time.sleep(3)
+    pydirectinput.keyUp('left')
+    pydirectinput.keyDown('up')
+    time.sleep(7)
+    pydirectinput.keyUp('up')
+    pydirectinput.keyDown('left')
+    time.sleep(.01)
+    pydirectinput.keyUp('left')
+    pydirectinput.keyDown('up')
+    time.sleep(.5)
+    pydirectinput.keyUp('up')
+    pydirectinput.keyDown('right')
+    time.sleep(.01)
+    pydirectinput.keyUp('right')
+    pydirectinput.keyDown('up')
+    time.sleep(1.4)
+    pydirectinput.keyUp('up')
+    pydirectinput.keyUp('x')
 
 def farmHordes():
     global debug
@@ -270,6 +298,7 @@ if os.path.isfile('encountersCount.txt'):
 
 
 
-while True:
-    farmHordes()
+runHoennFromPCToDittoCave()
+#while True:
+#    farmHordes()
 
