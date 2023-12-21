@@ -1,8 +1,24 @@
 This is a tool for pokeMMO automated farm! Built with fun in mind :))
 
 # PokeGame
-This class has many utility functions for manipulating the game's input!
-
+This class has many utility functions for manipulating the game's input:
+- isHorde
+- readScreen 
+    - Uses opencv and pytesseract to read the screen
+- check_for_shiny 
+    - Uses the pokemon text to check for shinies
+- detectFirstOccImage
+    - uses pyautogui to detect the first occurence of an image on the screen
+- detectImage
+    - uses pyautogui to detect all occurences of an image on the screen
+- holdkey
+    - holds an array of keys for a given amount of time
+- moveMouseAndClick
+    - moves the mouse to a given position and clicks (accepts floats as the x and y unlike autoit)
+- checkForCaptcha
+    - checks for a reference image of the top of the captcha window. It's best that you screenshot the top of the captcha window and use that as the reference image.  
+- logScreemshot 
+    - Used to save a screenshot at any point in the code
 ## Current State
 There are 3 different scripts with different functions:
 - farm.py
@@ -57,7 +73,6 @@ Username: admin
 Password: admin
 Setup an application and copy the token to the code. Download the gotify app on your phone and use your local network ip to connect to the server. You should now be able to receive notifications on your phone!  
 **Remember to always turn on the server before running the bot!**
-
 
 I love doing openCV bots for my favorite games since if you don't abuse the amount of time the bot is running there's no real danger of being bannned!
 Hopefully this will be of use for you!
