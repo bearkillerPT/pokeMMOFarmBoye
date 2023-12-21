@@ -3,22 +3,44 @@ This is a tool for pokeMMO automated farm! Built with fun in mind :))
 # PokeGame
 This class has many utility functions for manipulating the game's input!
 
-# FarmBoye
-Defined in farm.py this is the actual bot. The objectives are easy to set (search for abra_text).
+## Current State
+There are 3 different scripts with different functions:
+- farm.py
+    - Farm EXP, they all start with walking to the spot and then calling a generic farmEXP function:
+        - Kanto CinnaBar Island;
+        - Kanto Island 2;
+        - Kanto Pokemon League.
+    - Farm Abras Kanto:
+        - This is a rather old script wich is not very easy to setup.
+    - Farm Payday:
+        - Unova Undella Bay (my meowth can kill them in one shot so it's programmed with that in mind). It farms thief on luvdiscs and then payday on the rest. If the icon of the meowth with and Icon is detected the item will be auto removed from the pokemon.
+        - Kanto Island 5.
+    - Includes a somewhat working example of farming the Pewter City Gym with:
+        - 1st round whimsicott and torkoal
+        - Switch to 2 typhlosions and spam Eruption 
+- farmBeast.py
+    - farmBeasts function:
+        - Go to any patch of grass in Johto and use the walkaround function to define a direction to walk. It is supposed to be used with a meowth using payday and, if the pokemon survives, night slash.
+    - farmHordes
+        - Use one of the functions followin functions to select the place you'll farm. All of them use sweet scent and then teleport to the PC and go back. Supported spots:
+            - runJohtoFromPCToBellowSafari
+            - runJohtoFromPCToRoute42
+            - runJohtoFromPCToRoute45
+    - farmDittoCave
+        - Not sure what I wanted to do with it but right now it doesn't do anything.
+        - includes a runHoennFromPCToDittoCave that may be useful for other scripts.
+- fish.py
+    - This is a simple script that can be used anywhere. Position youself somewhere it's possible to fish and it will spam encounter until it finds a shiny. It will then send a push notification to your phone and stop the script. 
 It's finally up! Star the repo and follow me because I've some commitment to this project!
 
-## Current State
+- farmGyms already has a bunch of functions to run from PC to gyms, mostly in kanto. It's hard to get it to work, atleast with my current team. If the 2 initial pokemon die and the typhlosion don't it works fine!
+
+## Farm.py
 # Farm Abras funtion
-Currently the bot knows only how to farm abras. 
+This was the very first function developed for this bot and it's not very easy to setup but it's a good example of how to use the bot!
 It has a walking function that's random but tries to keep itself in the lower right and preferes to walk up and down since the farm area in kanto is around 3*15.
 It's programmed to use sleep powder in the first move so that you can throw at least 2 poke balls!
 [Watch it sped up!](pokemmo8x.mp4)
-
-# Farm EXP Island 2
-A function that uses Sweet scent (hotkey 5) and teleport (hotkey 6) to farm exp killing golducks while performing image to text analysis to check for shinies!
-
-# Pokemon League Cave Shiny Hunt
-A function purely made to catch shinies. It uses Sweet Scent 6 times and then teleports to the PC.
 
 # Shiny Detection
 This was the hardest function to implement requiring a bit of research!
@@ -26,6 +48,7 @@ The best way i found to detect shinies was to use opencv and pytesseract!
 Checkout pokeGame.py's check_for_shiny(self)! 
 The idea is to extract color using HSV decomposition and then pytesseract to accuratly detect the text name of pokemons in battle!
 Since pokemmo writes Shiny in the name of the pokemon if it is one!
+Keep in mind that IF YOU USE ANY CUSTOM STRINGS make sure to remove any alteration to the name of shiny pokemons! Billy's string put two white squares around the name.
 
 # Push notifications
 I've implemented a push notification system using the gotify api!
