@@ -524,10 +524,6 @@ class pokeFarmBoye:
             pyautogui.sleep(3)
         self.healPokemon() 
 
-        self.farm
-    
-
-
 def run_bot():
     poke_game = pokeGame()
     farm_boye = pokeFarmBoye(poke_game)
